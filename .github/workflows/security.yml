@@ -19,7 +19,8 @@ jobs:
         with:
           directory: infrastructure/aws
           # This tells Checkov to output the results to the console
-          external_checks_dir: policies
+          external_checks_dirs: policies
+          check: CUSTOM_AWS_1
           quiet: false 
           # This tells Checkov to FAIL the build if it finds issues
           soft_fail: false
