@@ -2,36 +2,42 @@
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
   
+  # checkov:skip=CKV2_AWS_11: "Flow logs invalid for this learning project (cost/complexity)"
+  # checkov:skip=CKV2_AWS_12: "Default SG restriction handled elsewhere"
+
   tags = {
     Name        = "guardrails-vpc"
     Environment = "Dev"
   }
 }
 
-# 2. The Subnet (A slice of the network)
-resource "aws_subnet" "public" {
+# 2. The Subnet (Private is safer)
+resource "aws_subnet" "private" {
   vpc_id     = aws_vpc.main.id
   cidr_block = "10.0.1.0/24"
 
   tags = {
-    Name = "guardrails-public-subnet"
+    Name = "guardrails-private-subnet"
   }
 }
 
-# 3. The "Bad" Security Group (We will fix this with policy later)
-resource "aws_security_group" "allow_all" {
-  name        = "allow_all_traffic"
-  description = "Allow all inbound traffic"
+# 3. The "Secure" Security Group
+resource "aws_security_group" "secure_sg" {
+  name        = "secure_app_traffic"
+  description = "Allow inbound HTTP from internal network only"
   vpc_id      = aws_vpc.main.id
 
+  # ✅ FIXED: Only allow traffic from within the VPC (10.0.0.0/16), not the whole internet
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"] # 🚨 Security Risk!
+    description = "Allow HTTP from internal VPC"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"] 
   }
 
   egress {
+    description = "Allow all egress"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -41,14 +47,28 @@ resource "aws_security_group" "allow_all" {
 
 # 4. The Server (EC2 Instance)
 resource "aws_instance" "app_server" {
-  ami           = "ami-0c7217cdde317cfec" # Ubuntu 22.04 in us-east-1
-  instance_type = "t2.micro"              # Free tier eligible
-  subnet_id     = aws_subnet.public.id
+  ami           = "ami-0c7217cdde317cfec" 
+  instance_type = "t2.micro"              
+  subnet_id     = aws_subnet.private.id
   
-  # We are intentionally attaching the risky security group
-  vpc_security_group_ids = [aws_security_group.allow_all.id]
+  # ✅ FIXED: Using the secure group
+  vpc_security_group_ids = [aws_security_group.secure_sg.id]
+
+  # ✅ FIXED: Encrypt the hard drive
+  root_block_device {
+    encrypted = true
+  }
+
+  # ✅ FIXED: Enable Metadata V2 (Protects against SSRF attacks)
+  metadata_options {
+    http_tokens = "required"
+  }
+
+  # checkov:skip=CKV_AWS_126: "Detailed monitoring costs money, skipping for free tier"
+  # checkov:skip=CKV_AWS_135: "EBS optimizaton not supported on t2.micro"
+  # checkov:skip=CKV2_AWS_41: "IAM role not needed for this simple test"
 
   tags = {
-    Name = "guardrails-app-server"
+    Name = "guardrails-app-server-secure"
   }
 }
