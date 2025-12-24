@@ -70,5 +70,6 @@ resource "aws_instance" "app_server" {
 
   tags = {
     Name = "guardrails-app-server-secure"
+    CostCenter = "Platform-Engineering-101"
   }
 }
