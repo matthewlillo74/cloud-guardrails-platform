@@ -1,8 +1,10 @@
-# We are using Python 2.7 (End of Life) on purpose.
-# This image has HUNDREDS of known vulnerabilities.
-FROM python:2.7-alpine
+# Upgrade to Python 3.9 (Alpine version is tiny and secure)
+FROM python:3.9-alpine
 
 WORKDIR /app
 
-# Just a dummy command so the container runs
-CMD ["echo", "Hello Security"]
+# We add a non-root user for extra security (Best Practice)
+RUN adduser -D myuser
+USER myuser
+
+CMD ["echo", "Hello Secure World"]
