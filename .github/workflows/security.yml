@@ -4,23 +4,38 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
 
 jobs:
-  iac-scan:
-    name: Checkov IaC Scan
+  # JOB 1: SECRET SCANNING (New!)
+  secrets-scan:
     runs-on: ubuntu-latest
+    name: Detect Hardcoded Secrets
     steps:
-      - name: Checkout Code
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Important: Fetch full history to check past commits
+
+      - name: Gitleaks Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: free
+
+  # JOB 2: INFRASTRUCTURE SCANNING (Your existing Checkov job)
+  checkov-scan:
+    runs-on: ubuntu-latest
+    name: Run Checkov Scanner
+    needs: secrets-scan # Optional: Make Checkov wait for Secrets to pass
+    steps:
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
       - name: Run Checkov Scanner
         uses: bridgecrewio/checkov-action@master
         with:
           directory: infrastructure/aws
-          # This tells Checkov to output the results to the console
           external_checks_dirs: policies
           check: CUSTOM_AWS_1
-          quiet: false 
-          # This tells Checkov to FAIL the build if it finds issues
+          quiet: false
           soft_fail: false
