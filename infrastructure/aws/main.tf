@@ -48,7 +48,7 @@ resource "aws_security_group" "secure_sg" {
 # 4. The Server (EC2 Instance)
 resource "aws_instance" "app_server" {
   ami           = "ami-0c7217cdde317cfec" 
-  instance_type = "t2.micro"              
+  instance_type = "t3.large"              
   subnet_id     = aws_subnet.private.id
   
   # ✅ FIXED: Using the secure group
