@@ -75,4 +75,4 @@ jobs:
 
       - name: Run OPA Policies against Terraform
         # We tell Conftest to check HCL (Terraform) files using our policy folder
-        run: conftest test infrastructure/aws/main.tf -p policies/allowed_instances.rego --input hcl
+        run: conftest test -p policies/allowed_instances.rego --input hcl infrastructure/aws/main.tf
