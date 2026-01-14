@@ -74,5 +74,5 @@ jobs:
           sudo mv conftest /usr/local/bin
 
       - name: Run OPA Policies against Terraform
-        # We tell Conftest to check HCL (Terraform) files using our policy folder
+        # FIX: Put flags (-p and --input) BEFORE the file path
         run: conftest test -p policies/allowed_instances.rego --input hcl infrastructure/aws/main.tf
