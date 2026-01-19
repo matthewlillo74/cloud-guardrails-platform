@@ -71,3 +71,45 @@ graph TD
   └── /workflows
        └── security.yml       # The "Master Guardrail" CI/CD Pipeline
 Dockerfile                # Sample container for vulnerability testing
+```
+## 🔒 Planned Post-Deployment Guardrails (Roadmap)
+
+While the current platform enforces **Pre-Deployment** security, the following architectural enhancements are planned to extend enforcement into the **Post-Deployment** phase.
+
+### 1. Configuration Drift Detection
+
+**The Problem:**  
+Manual changes made directly in the AWS Console can bypass CI/CD security checks.
+
+**The Solution:**  
+Implement a scheduled GitHub Actions workflow (cron-based) that runs `terraform plan` nightly against the live infrastructure state.
+
+**Outcome:**  
+Alerts the security team if production infrastructure drifts from the approved, policy-compliant configuration.
+
+---
+
+### 2. Automated Remediation (Self-Healing Infrastructure)
+
+**The Problem:**  
+Waiting for manual intervention to remediate critical misconfigurations (such as open security group ingress rules) increases exposure time.
+
+**The Solution:**  
+Deploy AWS EventBridge rules that monitor CloudTrail events (e.g., `AuthorizeSecurityGroupIngress`) and trigger Lambda-based remediation functions.
+
+**Outcome:**  
+Automatically reverts non-compliant changes within seconds of detection.
+
+---
+
+### 3. Centralized Security & Compliance Dashboard
+
+**The Problem:**  
+Distributed pipeline logs and tool outputs are difficult for stakeholders and management to visualize.
+
+**The Solution:**  
+Aggregate JSON outputs from Checkov, Trivy, and OPA into a centralized dashboard (e.g., DefectDojo).
+
+**Outcome:**  
+Provides a unified view of vulnerability trends, mean time to remediate (MTTR), and overall cloud security posture.
+
