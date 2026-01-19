@@ -7,8 +7,6 @@ An automated **DevSecOps Governance Platform** designed to enforce security, com
 
 Unlike traditional "security scanners" that only find issues after deployment, this platform operates as a **Shift-Left Control Plane**. It integrates directly into the CI/CD pipeline to block insecure configurations (Infrastructure-as-Code), vulnerable dependencies, and policy violations *before* they can ever reach production.
 
----
-
 ## 🏗 Architecture
 
 The system follows a **Zero-Trust Pipeline** design pattern:
