@@ -1,5 +1,5 @@
-# Upgrade to Python 3.9 (Alpine version is tiny and secure)
-FROM python:3.9-alpine
+
+FROM python:3.12-alpine
 
 WORKDIR /app
 
